@@ -6,21 +6,8 @@ import { GraphQLClient, gql } from 'graphql-request';
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
 	const endpoint = "https://wanderlusttest.000webhostapp.com/graphql"
 	const graphQLClient = new GraphQLClient(endpoint);
-	const referringURL = ctx.req.headers?.referer || null;
 	const pathArr = ctx.query.postpath as Array<string>;
 	const path = pathArr.join('/');
-	console.log(path);
-	const fbclid = ctx.query.fbclid;
-
-	// redirect if facebook is the referer or request contains fbclid
-	if (referringURL?.includes('facebook.com') || fbclid) {
-		return {
-			redirect: {
-				permanent: false,
-				destination: `https://wanderlusttest.000webhostapp.com/${encodeURI(path as string)}`,
-			},
-		};
-	}
 
 	const query = gql`
 		{
@@ -55,7 +42,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 	}
 	return {
 		props: {
-			path,
 			post: data.post,
 			host: ctx.req.headers.host,
 		},
@@ -65,11 +51,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 interface PostProps {
 	post: any;
 	host: string;
-	path: string;
 }
 
 const Post: React.FC<PostProps> = (props) => {
-	const { post, host, path } = props;
+	const { post, host } = props;
 
 	// to remove tags from excerpt
 	const removeTags = (str: string) => {
